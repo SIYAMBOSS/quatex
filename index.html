@@ -1,82 +1,161 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Cyber Dashboard</title>
+<title>Cyber Terminal</title>
+
 <style>
 body {
+  margin: 0;
   background: black;
-  color: #00ffcc;
+  color: #00ff9f;
   font-family: monospace;
-  text-align: center;
+  overflow: hidden;
 }
+
+#matrix {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
 .container {
-  margin-top: 50px;
+  position: relative;
+  z-index: 1;
+  padding: 20px;
 }
-input, button {
+
+h1 {
+  text-align: center;
+  text-shadow: 0 0 10px #00ff9f;
+}
+
+.terminal {
+  border: 1px solid #00ff9f;
+  padding: 15px;
+  height: 300px;
+  overflow-y: auto;
+  background: rgba(0,0,0,0.8);
+}
+
+input {
+  width: 80%;
   padding: 10px;
-  margin: 10px;
   background: black;
-  border: 1px solid #00ffcc;
-  color: #00ffcc;
+  border: 1px solid #00ff9f;
+  color: #00ff9f;
 }
+
+button {
+  padding: 10px;
+  background: black;
+  border: 1px solid #00ff9f;
+  color: #00ff9f;
+  cursor: pointer;
+}
+
 button:hover {
-  background: #00ffcc;
+  background: #00ff9f;
   color: black;
 }
-.box {
-  border: 1px solid #00ffcc;
-  padding: 20px;
-  margin: 20px;
+
+.scan-box {
+  margin-top: 20px;
+  border: 1px solid #00ff9f;
+  padding: 10px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>⚡ Cyber Security Tool ⚡</h1>
+<canvas id="matrix"></canvas>
 
 <div class="container">
+<h1>⚡ CYBER TERMINAL ⚡</h1>
 
-<div class="box">
-<h2>Password Strength Checker</h2>
-<input type="text" id="password" placeholder="Enter password">
-<button onclick="checkPassword()">Check</button>
-<p id="result"></p>
-</div>
+<div class="terminal" id="terminal"></div>
 
-<div class="box">
-<h2>Hash Generator (SHA-256)</h2>
-<input type="text" id="text" placeholder="Enter text">
-<button onclick="generateHash()">Generate</button>
-<p id="hash"></p>
+<input type="text" id="command" placeholder="Enter command...">
+<button onclick="runCommand()">Run</button>
+
+<div class="scan-box">
+<h3>System Scan</h3>
+<button onclick="startScan()">Start Scan</button>
+<p id="scanResult"></p>
 </div>
 
 </div>
 
 <script>
-function checkPassword() {
-  let pass = document.getElementById("password").value;
-  let strength = "Weak";
+// MATRIX EFFECT
+let canvas = document.getElementById("matrix");
+let ctx = canvas.getContext("2d");
 
-  if(pass.length > 8 && /[A-Z]/.test(pass) && /[0-9]/.test(pass)) {
-    strength = "Strong";
-  } else if(pass.length > 5) {
-    strength = "Medium";
+canvas.height = window.innerHeight;
+canvas.width = window.innerWidth;
+
+let letters = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+letters = letters.split("");
+
+let fontSize = 14;
+let columns = canvas.width/fontSize;
+let drops = [];
+
+for(let x=0; x<columns; x++) drops[x]=1;
+
+function draw() {
+  ctx.fillStyle = "rgba(0,0,0,0.05)";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  ctx.fillStyle = "#00ff9f";
+  ctx.font = fontSize + "px monospace";
+
+  for(let i=0; i<drops.length; i++){
+    let text = letters[Math.floor(Math.random()*letters.length)];
+    ctx.fillText(text,i*fontSize,drops[i]*fontSize);
+
+    if(drops[i]*fontSize > canvas.height && Math.random()>0.975)
+      drops[i]=0;
+
+    drops[i]++;
   }
-
-  document.getElementById("result").innerText = strength;
 }
 
-async function generateHash() {
-  let text = document.getElementById("text").value;
-  let encoder = new TextEncoder();
-  let data = encoder.encode(text);
-  let hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  let hashArray = Array.from(new Uint8Array(hashBuffer));
-  let hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  document.getElementById("hash").innerText = hashHex;
+setInterval(draw,33);
+
+// TERMINAL
+function addLine(text){
+  let term = document.getElementById("terminal");
+  term.innerHTML += "> " + text + "<br>";
+  term.scrollTop = term.scrollHeight;
+}
+
+function runCommand(){
+  let cmd = document.getElementById("command").value;
+  addLine(cmd);
+
+  if(cmd === "scan"){
+    addLine("Scanning network...");
+  }
+  else if(cmd === "whoami"){
+    addLine("Access: Guest User");
+  }
+  else if(cmd === "clear"){
+    document.getElementById("terminal").innerHTML = "";
+  }
+  else{
+    addLine("Unknown command");
+  }
+}
+
+// SCAN ANIMATION
+function startScan(){
+  let result = document.getElementById("scanResult");
+  result.innerHTML = "Scanning...";
+
+  setTimeout(()=>{ result.innerHTML = "✔ System Secure"; },2000);
 }
 </script>
 

@@ -2,68 +2,76 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Cyber Terminal</title>
+<title>Secure Access</title>
 
 <style>
 body {
   margin: 0;
   background: black;
-  color: #00ff9f;
+  color: #00ffcc;
   font-family: monospace;
   overflow: hidden;
 }
 
-#matrix {
+/* MATRIX BG */
+canvas {
   position: fixed;
   width: 100%;
   height: 100%;
   z-index: 0;
 }
 
-.container {
-  position: relative;
-  z-index: 1;
-  padding: 20px;
-}
-
-h1 {
+/* CENTER BOX */
+#loginBox {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  border: 1px solid #00ffcc;
+  padding: 30px;
   text-align: center;
-  text-shadow: 0 0 10px #00ff9f;
-}
-
-.terminal {
-  border: 1px solid #00ff9f;
-  padding: 15px;
-  height: 300px;
-  overflow-y: auto;
+  z-index: 2;
   background: rgba(0,0,0,0.8);
+  box-shadow: 0 0 20px #00ffcc;
 }
 
 input {
-  width: 80%;
   padding: 10px;
+  margin: 10px;
+  width: 200px;
   background: black;
-  border: 1px solid #00ff9f;
-  color: #00ff9f;
+  border: 1px solid #00ffcc;
+  color: #00ffcc;
 }
 
 button {
-  padding: 10px;
+  padding: 10px 20px;
   background: black;
-  border: 1px solid #00ff9f;
-  color: #00ff9f;
+  border: 1px solid #00ffcc;
+  color: #00ffcc;
   cursor: pointer;
 }
 
 button:hover {
-  background: #00ff9f;
+  background: #00ffcc;
   color: black;
 }
 
-.scan-box {
-  margin-top: 20px;
-  border: 1px solid #00ff9f;
-  padding: 10px;
+/* TERMINAL */
+#terminal {
+  display: none;
+  padding: 20px;
+  z-index: 2;
+  position: relative;
+}
+
+.line {
+  animation: glow 1s infinite alternate;
+}
+
+@keyframes glow {
+  from {text-shadow: 0 0 5px #00ffcc;}
+  to {text-shadow: 0 0 20px #00ffcc;}
 }
 </style>
 </head>
@@ -72,90 +80,98 @@ button:hover {
 
 <canvas id="matrix"></canvas>
 
-<div class="container">
-<h1>⚡ CYBER TERMINAL ⚡</h1>
-
-<div class="terminal" id="terminal"></div>
-
-<input type="text" id="command" placeholder="Enter command...">
-<button onclick="runCommand()">Run</button>
-
-<div class="scan-box">
-<h3>System Scan</h3>
-<button onclick="startScan()">Start Scan</button>
-<p id="scanResult"></p>
+<div id="loginBox">
+<h2>🔐 Secure Login</h2>
+<input type="text" id="user" placeholder="Username"><br>
+<input type="password" id="pass" placeholder="Password"><br>
+<button onclick="login()">ACCESS</button>
+<p id="msg"></p>
 </div>
 
-</div>
+<div id="terminal"></div>
 
 <script>
 // MATRIX EFFECT
-let canvas = document.getElementById("matrix");
-let ctx = canvas.getContext("2d");
+let c = document.getElementById("matrix");
+let ctx = c.getContext("2d");
 
-canvas.height = window.innerHeight;
-canvas.width = window.innerWidth;
+c.height = window.innerHeight;
+c.width = window.innerWidth;
 
-let letters = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+let letters = "01XYZHACK";
 letters = letters.split("");
 
-let fontSize = 14;
-let columns = canvas.width/fontSize;
+let font = 14;
+let columns = c.width/font;
 let drops = [];
 
-for(let x=0; x<columns; x++) drops[x]=1;
+for(let i=0;i<columns;i++) drops[i]=1;
 
-function draw() {
-  ctx.fillStyle = "rgba(0,0,0,0.05)";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+function draw(){
+  ctx.fillStyle="rgba(0,0,0,0.05)";
+  ctx.fillRect(0,0,c.width,c.height);
 
-  ctx.fillStyle = "#00ff9f";
-  ctx.font = fontSize + "px monospace";
+  ctx.fillStyle="#00ffcc";
+  ctx.font=font+"px monospace";
 
-  for(let i=0; i<drops.length; i++){
-    let text = letters[Math.floor(Math.random()*letters.length)];
-    ctx.fillText(text,i*fontSize,drops[i]*fontSize);
+  for(let i=0;i<drops.length;i++){
+    let text=letters[Math.floor(Math.random()*letters.length)];
+    ctx.fillText(text,i*font,drops[i]*font);
 
-    if(drops[i]*fontSize > canvas.height && Math.random()>0.975)
+    if(drops[i]*font>c.height && Math.random()>0.975)
       drops[i]=0;
 
     drops[i]++;
   }
 }
-
 setInterval(draw,33);
 
-// TERMINAL
-function addLine(text){
+// LOGIN SYSTEM
+function login(){
+  let u = document.getElementById("user").value;
+  let p = document.getElementById("pass").value;
+  let msg = document.getElementById("msg");
+
+  msg.innerHTML = "Checking credentials...";
+
+  setTimeout(()=>{
+    if(u==="admin" && p==="1234"){
+      msg.innerHTML = "✔ ACCESS GRANTED";
+      document.getElementById("loginBox").style.display="none";
+      startTerminal();
+    } else {
+      msg.innerHTML = "❌ ACCESS DENIED";
+    }
+  },1500);
+}
+
+// TERMINAL SIMULATION
+function startTerminal(){
   let term = document.getElementById("terminal");
-  term.innerHTML += "> " + text + "<br>";
-  term.scrollTop = term.scrollHeight;
-}
+  term.style.display="block";
 
-function runCommand(){
-  let cmd = document.getElementById("command").value;
-  addLine(cmd);
+  let lines = [
+    "Initializing system...",
+    "Bypassing firewall...",
+    "Accessing secure server...",
+    "Decrypting data...",
+    "██████████ 100%",
+    "Welcome, Admin 😎"
+  ];
 
-  if(cmd === "scan"){
-    addLine("Scanning network...");
+  let i=0;
+  function showLine(){
+    if(i < lines.length){
+      let div = document.createElement("div");
+      div.className="line";
+      div.innerText = "> " + lines[i];
+      term.appendChild(div);
+      i++;
+      setTimeout(showLine,700);
+    }
   }
-  else if(cmd === "whoami"){
-    addLine("Access: Guest User");
-  }
-  else if(cmd === "clear"){
-    document.getElementById("terminal").innerHTML = "";
-  }
-  else{
-    addLine("Unknown command");
-  }
-}
 
-// SCAN ANIMATION
-function startScan(){
-  let result = document.getElementById("scanResult");
-  result.innerHTML = "Scanning...";
-
-  setTimeout(()=>{ result.innerHTML = "✔ System Secure"; },2000);
+  showLine();
 }
 </script>
 
